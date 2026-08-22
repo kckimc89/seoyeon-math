@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<title>서연이 수학공부</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fb;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+main{max-width:720px;margin:auto;padding:14px 16px 50px}.top{position:sticky;top:0;z-index:10;background:#f4f6fb;padding:7px 0 10px}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px}.brand{font-size:24px;font-weight:900}.wallet{background:#fff;padding:9px 12px;border-radius:14px;font-weight:800;box-shadow:0 2px 8px #0001}
+.progress{height:8px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#4f46e5;transition:.25s}
+.card{background:#fff;border-radius:22px;padding:20px;margin:12px 0;box-shadow:0 4px 18px #0000000d}.hidden{display:none!important}
+h1,h2,h3{margin-top:0}.center{text-align:center}.muted{color:#6b7280}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{width:100%;border:0;border-radius:15px;padding:15px;margin-top:10px;font-size:17px;font-weight:800;background:#4f46e5;color:white}button.secondary{background:#eef2ff;color:#3730a3}button.dark{background:#111827}button.green{background:#15803d}button.gold{background:#b45309}button:disabled{opacity:.45}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#f8fafc;border-radius:15px;padding:13px;text-align:center}.stat b{display:block;font-size:23px;margin-top:4px}
+.explain{line-height:1.75}.example{background:#f8fafc;border-radius:15px;padding:14px;text-align:center;font:800 30px/1.15 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-line}
+.problem{width:230px;margin:16px auto;font:800 44px/1.05 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}.line{border-bottom:4px solid #222;margin-top:5px}
+.process-row,.answer-row{display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0}.label{font-size:20px;font-weight:800;white-space:nowrap}
+input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5}
+.feedback{padding:14px;border-radius:15px;margin-top:12px;line-height:1.6}.bad{background:#fef2f2;color:#991b1b}.good{background:#ecfdf5;color:#166534}
+.ticket{border:3px dashed #d97706;background:#fffbeb;border-radius:18px;padding:18px;text-align:center}.big{font-size:34px;font-weight:900;color:#92400e}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 4px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
+.advice{background:#eff6ff;border-radius:15px;padding:14px;line-height:1.7}.note{background:#f8fafc;border-radius:15px;padding:13px;line-height:1.6}
+.badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:99px;padding:5px 9px;font-size:13px;font-weight:800}
+@media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div class="head"><div class="brand">🌟 서연이 수학공부</div><div class="wallet" id="topWallet">📺 0장</div></div><div class="progress"><div class="bar" id="bar"></div></div></div>
+
+<section id="home" class="card">
+<h2>오늘의 공부</h2>
+<div class="stats">
+<div class="stat">학습 차수<b id="sCycle">1차</b></div><div class="stat">현재 회차<b id="sLesson">1회</b></div>
+<div class="stat">TV 시청권<b id="sTickets">0장</b></div><div class="stat">외식권<b id="sFood">0장</b></div>
+</div>
+<div class="grid" style="margin-top:12px"><button id="startBtn">📚 수학 공부 시작</button><button class="secondary" id="walletBtn">🎁 보상 지갑</button><button class="dark" id="reportBtn">👩 엄마 학습리포트</button><button class="secondary" id="guideBtn">📖 학습 방법</button></div>
+</section>
+
+<section id="guide" class="card hidden">
+<h2>📖 학습 방법</h2>
+<div class="explain"><b>1~10회</b>는 한 자리 수와 두 자리 수의 덧셈·뺄셈을 연습해요.<br><b>11~20회</b>는 두 자리 수끼리 계산해요.<br><br>
+① 같은 자리를 맞춰 세로로 계산해요.<br>② 일의 자리부터 계산해요.<br>③ 덧셈에서 10 이상이면 받아올림을 해요.<br>④ 뺄셈에서 뺄 수 없으면 십의 자리에서 1을 빌려와요.</div>
+<div class="example">  1
+ 27
++ 8
+───
+ 35</div><button class="dark back">홈으로</button>
+</section>
+
+<section id="lesson" class="card hidden">
+<div class="center muted" id="meta"></div><h2 class="center" id="lessonTitle"></h2><div class="problem" id="problem"></div>
+<div id="process"></div>
+<div class="answer-row"><span class="label">정답</span><input class="answer" id="answer" inputmode="numeric" pattern="[0-9]*" autocomplete="off"></div>
+<button id="checkBtn">정답 확인</button><div id="feedback"></div><button class="dark hidden" id="retryBtn">다시 풀기</button><button class="green hidden" id="nextBtn">다음 문제 →</button>
+</section>
+
+<section id="reward" class="card hidden center">
+<h2>🎉 회차 성공!</h2><div class="ticket"><div class="big">📺 TV 15분 시청권 +1</div><p>이번 회차를 한 번도 틀리지 않고 모두 맞혔어요!</p><b id="rewardTotal"></b></div>
+<button class="gold" id="showMomBtn">엄마에게 보여주기</button><div id="momBox" class="hidden"><div class="note">👩 엄마 확인: 이번 회차 무오답 성공과 시청권 1장을 확인합니다.</div><button class="green" id="approveBtn">엄마 확인 완료 ✓</button></div>
+</section>
+
+<section id="complete" class="card hidden center"><h2>🏆 20회 완주!</h2><p>정말 잘했어요. 다음 차수에서는 새로운 문제로 다시 공부합니다.</p><div class="ticket"><div class="big" id="completeText"></div></div><button id="nextCycleBtn">다음 차수 시작하기</button></section>
+
+<section id="wallet" class="card hidden">
+<h2>🎁 보상 지갑</h2><div class="stats"><div class="stat">TV 15분권<b id="wTickets">0장</b></div><div class="stat">외식권<b id="wFood">0장</b></div><div class="stat">누적 획득<b id="wEarned">0장</b></div><div class="stat">TV 사용<b id="wUsed">0장</b></div></div>
+<button class="gold" id="useBtn">📺 TV 15분 사용</button><button class="green" id="foodBtn">🍕 TV 10장 → 음식/외식 1회</button><div id="walletMsg" class="note hidden"></div><button class="dark back">홈으로</button>
+</section>
+
+<section id="report" class="card hidden">
+<h2>👩 엄마 학습리포트</h2><div id="reportSummary" class="note"></div><h3>최근 학습 기록</h3><div class="tablewrap"><table><thead><tr><th>날짜</th><th>차수</th><th>회차</th><th>시간</th><th>문제</th><th>첫 정답</th><th>오답</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+<h3>💡 지도 조언</h3><div id="advice" class="advice"></div><h3>❤️ 엄마의 한마디</h3><textarea id="momNote" style="width:100%;min-height:90px;border:2px solid #ddd;border-radius:12px;padding:10px;font:inherit" placeholder="서연이에게 남길 말을 적어주세요."></textarea><button id="saveNote">엄마의 한마디 저장</button><div id="savedNote" class="note hidden"></div><button class="dark back">홈으로</button>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var KEY="seoyeon_math_v2";
+var state={cycle:1,lesson:1,tickets:0,food:0,earned:0,used:0,history:[],momNote:""};
+try{var x=localStorage.getItem(KEY);if(x)state=Object.assign(state,JSON.parse(x));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}update();}
+function $(id){return document.getElementById(id)}
+function hide(){["home","guide","lesson","reward","complete","wallet","report"].forEach(function(id){$(id).classList.add("hidden")})}
+function home(){hide();$("home").classList.remove("hidden");update()}
+function update(){
+$("topWallet").textContent="📺 "+state.tickets+"장";$("sCycle").textContent=state.cycle+"차";$("sLesson").textContent=state.lesson+"회";$("sTickets").textContent=state.tickets+"장";$("sFood").textContent=state.food+"장";
+$("bar").style.width=((state.lesson-1)/20*100)+"%";
+}
+function show(id){hide();$(id).classList.remove("hidden")}
+var q=0,tries=0,perfect=true,startTime=0,attemptsThisLesson=0;
+function makeProblems(){
+var base=state.lesson<=10?[[27,"+",8],[64,"-",7],[8,"+",35],[73,"-",6],[41,"+",9],[82,"-",5],[36,"+",7],[59,"-",8],[24,"+",6],[70,"-",4]]:[[27,"+",35],[64,"-",28],[48,"+",27],[73,"-",46],[36,"+",45],[92,"-",54],[56,"+",29],[84,"-",47],[67,"+",18],[95,"-",58]];
+var shift=(state.cycle-1)*3+(state.lesson-1);
+return base.map(function(x,i){var a=x[0]+(shift%8),b=x[2]+((shift+i)%6);if(x[1]=="-"&&a<=b)a=b+8;return{a:a,b:b,op:x[1],ans:x[1]=="+"?a+b:a-b}})
+}
+function start(){q=0;tries=0;attemptsThisLesson=0;perfect=true;startTime=Date.now();show("lesson");render()}
+function render(){
+var p=makeProblems()[q];$("meta").textContent=state.cycle+"차 · "+state.lesson+"회차 · "+(q+1)+"/10";$("lessonTitle").textContent=state.lesson<=10?"한 자리 수 ↔ 두 자리 수":"두 자리 수 ↔ 두 자리 수";
+$("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
+$("process").innerHTML=p.op=="+"?"<div class='process-row'><span class='label'>받아올림 숫자</span><input class='num' id='carry' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>":"<div class='process-row'><span class='label'>빌려온 1</span><input class='num' id='borrow' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>";
+$("answer").value="";$("feedback").className="";$("feedback").innerHTML="";$("checkBtn").classList.remove("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
+setTimeout(function(){var first=$(p.op=="+"?"carry":"borrow");if(first)first.focus()},80)
+}
+function fail(msg){$("feedback").className="feedback bad";$("feedback").innerHTML=msg}
+function check(){
+var p=makeProblems()[q],v=Number($("answer").value);if($("answer").value.trim()===""){fail("✏️ 정답을 입력해 주세요.");return}attemptsThisLesson++;tries++;
+if(v===p.ans){$("feedback").className="feedback good";$("feedback").innerHTML=tries===1?"🎉 정답이에요!":"👏 다시 풀어서 맞혔어요!";$("checkBtn").classList.add("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.remove("hidden")}
+else{perfect=false;fail("❌ 아쉬워요. 다시 생각해 볼까요?<br>💡 "+(p.op=="+"?"일의 자리부터 더하고 10 이상이면 1을 받아올림해요.":"일의 자리에서 뺄 수 없으면 십의 자리에서 1을 빌려와요."));$("checkBtn").classList.add("hidden");$("retryBtn").classList.remove("hidden")}
+}
+function retry(){tries=0;$("answer").value="";var c=$("carry");if(c)c.value="";var b=$("borrow");if(b)b.value="";$("feedback").className="";$("feedback").innerHTML="";$("retryBtn").classList.add("hidden");$("checkBtn").classList.remove("hidden");var first=c||b;if(first)first.focus();else $("answer").focus()}
+function next(){
+if(q<9){q++;tries=0;render();return}
+var minutes=Math.max(1,Math.round((Date.now()-startTime)/60000));state.history.push({date:new Date().toISOString().slice(0,10),cycle:state.cycle,lesson:state.lesson,minutes:minutes,problems:10,firstCorrect:perfect?10:Math.max(0,10-(attemptsThisLesson-10)),wrong:Math.max(0,attemptsThisLesson-10)});
+if(perfect){state.tickets++;state.earned++;save();$("rewardTotal").textContent="현재 TV 시청권: "+state.tickets+"장";show("reward")}else{advance()}
+}
+function advance(){if(state.lesson===20){save();$("completeText").textContent=state.cycle+"차 20회 완주!";show("complete")}else{state.lesson++;save();start()}}
+$("startBtn").onclick=start;$("checkBtn").onclick=check;$("retryBtn").onclick=retry;$("nextBtn").onclick=next;
+$("showMomBtn").onclick=function(){$("momBox").classList.remove("hidden");$("showMomBtn").classList.add("hidden")};$("approveBtn").onclick=advance;
+$("nextCycleBtn").onclick=function(){state.cycle++;state.lesson=1;save();start()};
+$("walletBtn").onclick=function(){show("wallet");$("wTickets").textContent=state.tickets+"장";$("wFood").textContent=state.food+"장";$("wEarned").textContent=state.earned+"장";$("wUsed").textContent=state.used+"장";$("useBtn").disabled=state.tickets<1;$("foodBtn").disabled=state.tickets<10};
+$("useBtn").onclick=function(){if(state.tickets<1)return;if(confirm("엄마 확인: TV 15분 시청을 완료했나요?")){state.tickets--;state.used++;save();$("walletMsg").textContent="시청 완료! 남은 시청권은 "+state.tickets+"장입니다.";$("walletMsg").classList.remove("hidden");$("walletBtn").click()}};
+$("foodBtn").onclick=function(){if(state.tickets<10)return;if(confirm("엄마 확인: TV 시청권 10장을 음식/외식 1회권으로 교환할까요?")){state.tickets-=10;state.food++;save();$("walletMsg").textContent="🍕 외식권 1장 획득! 남은 TV 시청권은 "+state.tickets+"장입니다.";$("walletMsg").classList.remove("hidden");$("walletBtn").click()}};
+$("reportBtn").onclick=function(){show("report");var h=state.history.slice(-12).reverse(),mins=h.reduce(function(s,x){return s+x.minutes},0),wrong=h.reduce(function(s,x){return s+x.wrong},0),probs=h.reduce(function(s,x){return s+x.problems},0);$("reportSummary").innerHTML="최근 "+h.length+"회 · 학습시간 <b>"+mins+"분</b> · 문제 <b>"+probs+"문제</b> · 오답 <b>"+wrong+"회</b> · TV 시청권 <b>"+state.tickets+"장</b>";$("historyBody").innerHTML=h.length?h.map(function(x){return"<tr><td>"+x.date.slice(5)+"</td><td>"+x.cycle+"</td><td>"+x.lesson+"</td><td>"+x.minutes+"분</td><td>"+x.problems+"</td><td>"+x.firstCorrect+"</td><td>"+x.wrong+"</td></tr>"}).join(""):"<tr><td colspan='7'>아직 학습 기록이 없습니다.</td></tr>";$("advice").textContent=wrong>=5?"받아올림·받아내림 과정을 엄마와 천천히 3~5문제 연습해 주세요.":wrong>=2?"계산을 서두르는 실수가 있는지 확인하고 일의 자리부터 소리 내어 계산하게 해 주세요.":"학습이 안정적입니다. 계산 과정까지 설명하게 하며 칭찬해 주세요.";if(state.momNote){$("momNote").value=state.momNote;$("savedNote").textContent="저장된 엄마의 한마디: "+state.momNote;$("savedNote").classList.remove("hidden")}};
+$("saveNote").onclick=function(){state.momNote=$("momNote").value.trim();save();$("savedNote").textContent="저장되었습니다 ❤️";$("savedNote").classList.remove("hidden")};
+$("guideBtn").onclick=function(){show("guide")};document.querySelectorAll(".back").forEach(function(b){b.onclick=home});
+document.addEventListener("keydown",function(e){if(e.key!=="Enter")return;var t=e.target;if(t.id==="carry"||t.id==="borrow"){e.preventDefault();$("answer").focus()}else if(t.id==="answer"){e.preventDefault();if($("answer").value.trim())check()}});
+update();
+})();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script></body>
+</html>
