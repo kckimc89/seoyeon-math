@@ -20,7 +20,7 @@ button{width:100%;border:0;border-radius:15px;padding:15px;margin-top:10px;font-
 .explain{line-height:1.75}.example{background:#f8fafc;border-radius:15px;padding:14px;text-align:center;font:800 30px/1.15 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-line}
 .problem{width:230px;margin:16px auto;font:800 44px/1.05 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}.line{border-bottom:4px solid #222;margin-top:5px}
 .process-row,.answer-row{display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0}.label{font-size:20px;font-weight:800;white-space:nowrap}
-input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5}
+input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5;outline:3px solid #c7d2fe;caret-color:#111}
 .feedback{padding:14px;border-radius:15px;margin-top:12px;line-height:1.6}.bad{background:#fef2f2;color:#991b1b}.good{background:#ecfdf5;color:#166534}
 .ticket{border:3px dashed #d97706;background:#fffbeb;border-radius:18px;padding:18px;text-align:center}.big{font-size:34px;font-weight:900;color:#92400e}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 4px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
@@ -105,10 +105,12 @@ var p=makeProblems()[q];$("meta").textContent=state.cycle+"차 · "+state.lesson
 $("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
 $("process").innerHTML=p.op=="+"?"<div class='process-row'><span class='label'>받아올림 숫자</span><input class='num' id='carry' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>":"<div class='process-row'><span class='label'>빌려온 1</span><input class='num' id='borrow' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>";
 $("answer").value="";$("feedback").className="";$("feedback").innerHTML="";$("checkBtn").classList.remove("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
-setTimeout(function(){
-  var first=$(p.op=="+"?"carry":"borrow");
-  if(first){ first.focus({preventScroll:true}); try{first.setSelectionRange(0,first.value.length)}catch(e){} }
-},300)
+var first=$(p.op=="+"?"carry":"borrow");
+if(first){
+  first.autofocus=true;
+  first.focus({preventScroll:true});
+  try{first.setSelectionRange(0,0)}catch(e){}
+}
 }
 function fail(msg){$("feedback").className="feedback bad";$("feedback").innerHTML=msg}
 function check(){
