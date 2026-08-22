@@ -105,7 +105,10 @@ var p=makeProblems()[q];$("meta").textContent=state.cycle+"차 · "+state.lesson
 $("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
 $("process").innerHTML=p.op=="+"?"<div class='process-row'><span class='label'>받아올림 숫자</span><input class='num' id='carry' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>":"<div class='process-row'><span class='label'>빌려온 1</span><input class='num' id='borrow' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>";
 $("answer").value="";$("feedback").className="";$("feedback").innerHTML="";$("checkBtn").classList.remove("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
-setTimeout(function(){var first=$(p.op=="+"?"carry":"borrow");if(first)first.focus()},80)
+setTimeout(function(){
+  var first=$(p.op=="+"?"carry":"borrow");
+  if(first){ first.focus({preventScroll:true}); try{first.setSelectionRange(0,first.value.length)}catch(e){} }
+},300)
 }
 function fail(msg){$("feedback").className="feedback bad";$("feedback").innerHTML=msg}
 function check(){
@@ -129,6 +132,12 @@ $("foodBtn").onclick=function(){if(state.tickets<10)return;if(confirm("엄마 �
 $("reportBtn").onclick=function(){show("report");var h=state.history.slice(-12).reverse(),mins=h.reduce(function(s,x){return s+x.minutes},0),wrong=h.reduce(function(s,x){return s+x.wrong},0),probs=h.reduce(function(s,x){return s+x.problems},0);$("reportSummary").innerHTML="최근 "+h.length+"회 · 학습시간 <b>"+mins+"분</b> · 문제 <b>"+probs+"문제</b> · 오답 <b>"+wrong+"회</b> · TV 시청권 <b>"+state.tickets+"장</b>";$("historyBody").innerHTML=h.length?h.map(function(x){return"<tr><td>"+x.date.slice(5)+"</td><td>"+x.cycle+"</td><td>"+x.lesson+"</td><td>"+x.minutes+"분</td><td>"+x.problems+"</td><td>"+x.firstCorrect+"</td><td>"+x.wrong+"</td></tr>"}).join(""):"<tr><td colspan='7'>아직 학습 기록이 없습니다.</td></tr>";$("advice").textContent=wrong>=5?"받아올림·받아내림 과정을 엄마와 천천히 3~5문제 연습해 주세요.":wrong>=2?"계산을 서두르는 실수가 있는지 확인하고 일의 자리부터 소리 내어 계산하게 해 주세요.":"학습이 안정적입니다. 계산 과정까지 설명하게 하며 칭찬해 주세요.";if(state.momNote){$("momNote").value=state.momNote;$("savedNote").textContent="저장된 엄마의 한마디: "+state.momNote;$("savedNote").classList.remove("hidden")}};
 $("saveNote").onclick=function(){state.momNote=$("momNote").value.trim();save();$("savedNote").textContent="저장되었습니다 ❤️";$("savedNote").classList.remove("hidden")};
 $("guideBtn").onclick=function(){show("guide")};document.querySelectorAll(".back").forEach(function(b){b.onclick=home});
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible" && !$('lesson').classList.contains('hidden')){
+    var p=makeProblems()[q], first=$(p.op==="+"?"carry":"borrow");
+    if(first)setTimeout(function(){first.focus({preventScroll:true})},100);
+  }
+});
 document.addEventListener("keydown",function(e){if(e.key!=="Enter")return;var t=e.target;if(t.id==="carry"||t.id==="borrow"){e.preventDefault();$("answer").focus()}else if(t.id==="answer"){e.preventDefault();if($("answer").value.trim())check()}});
 update();
 })();
