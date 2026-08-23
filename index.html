@@ -21,6 +21,13 @@ button{width:100%;border:0;border-radius:15px;padding:15px;margin-top:10px;font-
 .problem{width:230px;margin:16px auto;font:800 44px/1.05 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}.line{border-bottom:4px solid #222;margin-top:5px}
 .process-row,.answer-row{display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0}.label{font-size:20px;font-weight:800;white-space:nowrap}
 input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5;outline:3px solid #c7d2fe;caret-color:#111}
+.visual{background:#f8fafc;border-radius:18px;padding:14px;margin:12px 0;text-align:center}
+.visual-title{font-weight:800;margin-bottom:8px}.blocks{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;max-width:330px;margin:auto}
+.ten{width:58px;height:24px;border:2px solid #4f46e5;border-radius:6px;background:#eef2ff}
+.block{width:22px;height:22px;border:2px solid #4f46e5;border-radius:5px;background:#eef2ff}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.choice-grid button{font-size:22px;font-weight:800;min-height:58px}
+.hint{background:#fff7ed;border-radius:15px;padding:12px;margin:10px 0;line-height:1.6}
 .feedback{padding:14px;border-radius:15px;margin-top:12px;line-height:1.6}.bad{background:#fef2f2;color:#991b1b}.good{background:#ecfdf5;color:#166534}
 .ticket{border:3px dashed #d97706;background:#fffbeb;border-radius:18px;padding:18px;text-align:center}.big{font-size:34px;font-weight:900;color:#92400e}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 4px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
@@ -39,7 +46,7 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 <div class="stat">학습 차수<b id="sCycle">1차</b></div><div class="stat">현재 회차<b id="sLesson">1회</b></div>
 <div class="stat">TV 시청권<b id="sTickets">0장</b></div><div class="stat">외식권<b id="sFood">0장</b></div>
 </div>
-<div class="grid" style="margin-top:12px"><button id="startBtn">📚 수학 공부 시작</button><button class="secondary" id="walletBtn">🎁 보상 지갑</button><button class="dark" id="reportBtn">👩 엄마 학습리포트</button><button class="secondary" id="guideBtn">📖 학습 방법</button></div>
+<div class="grid" style="margin-top:12px"><button id="reviewStart" class="secondary" style="margin-bottom:10px">🔁 오늘의 5분 복습</button><button id="startBtn">📚 수학 공부 시작</button><button class="secondary" id="walletBtn">🎁 보상 지갑</button><button class="dark" id="reportBtn">👩 엄마 학습리포트</button><button class="secondary" id="guideBtn">📖 학습 방법</button></div>
 </section>
 
 <section id="guide" class="card hidden">
@@ -55,9 +62,13 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 
 <section id="lesson" class="card hidden">
 <div class="center muted" id="meta"></div><h2 class="center" id="lessonTitle"></h2><div class="problem" id="problem"></div>
-<div id="process"></div>
-<div class="answer-row"><span class="label">정답</span><input class="answer" id="answer" inputmode="numeric" pattern="[0-9]*" autocomplete="off"></div>
-<button id="checkBtn">정답 확인</button><div id="feedback"></div><button class="dark hidden" id="retryBtn">다시 풀기</button><button class="green hidden" id="nextBtn">다음 문제 →</button>
+<div id="visual"></div>
+<div class="answer-row"><span class="label">정답을 골라보세요</span></div>
+<div id="choices" class="choice-grid"></div>
+<div id="hintBox" class="hint"></div>
+<div id="feedback"></div>
+<button class="dark hidden" id="retryBtn">🔄 다시 풀기</button>
+<button class="green hidden" id="nextBtn">다음 문제 →</button>
 </section>
 
 <section id="reward" class="card hidden center">
@@ -82,6 +93,7 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 (function(){
 "use strict";
 var KEY="seoyeon_math_v2";
+var reviewMode=false, reviewProblem=null, stars=Number(localStorage.getItem('seoyeonStars')||0);
 var state={cycle:1,lesson:1,tickets:0,food:0,earned:0,used:0,history:[],momNote:""};
 try{var x=localStorage.getItem(KEY);if(x)state=Object.assign(state,JSON.parse(x));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}update();}
@@ -100,25 +112,96 @@ var shift=(state.cycle-1)*3+(state.lesson-1);
 return base.map(function(x,i){var a=x[0]+(shift%8),b=x[2]+((shift+i)%6);if(x[1]=="-"&&a<=b)a=b+8;return{a:a,b:b,op:x[1],ans:x[1]=="+"?a+b:a-b}})
 }
 function start(){q=0;tries=0;attemptsThisLesson=0;perfect=true;startTime=Date.now();show("lesson");render()}
+function makeReviewProblem(){
+  var all=makeProblems();
+  var candidates=[];
+  for(var i=0;i<all.length;i++){
+    var p=all[i];
+    if((p.a%10)+(p.b%10)>=10 || (p.op==="-" && (p.a%10)<(p.b%10))) candidates.push(p);
+  }
+  return candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : all[Math.floor(Math.random()*all.length)];
+}
+function visualFor(p){
+  var a=Math.min(40,p.a), b=Math.min(40,p.b);
+  function blocks(n){
+    var h="";
+    for(var i=0;i<n;i++) h+="<span class='"+(i%10===0&&i>0?"ten":"block")+"'></span>";
+    return h;
+  }
+  return "<div class='visual-title'>🔢 숫자를 그림으로 생각해 봐요</div>"+
+    "<div class='muted'>"+p.a+" "+p.op+" "+p.b+"</div>"+
+    "<div class='blocks' style='margin-top:8px'>"+blocks(a)+"</div>"+
+    "<div style='font-weight:800;margin:6px'>"+(p.op==="+"?"＋":"－")+"</div>"+
+    "<div class='blocks'>"+blocks(b)+"</div>"+
+    "<div class='muted' style='margin-top:8px'>10개가 한 묶음이에요.</div>";
+}
+function hintFor(p,level){
+  if(p.op==="+"){
+    if(level===1) return "💡 힌트 1: 일의 자리부터 계산해 볼까요?";
+    if(level===2) return "💡 힌트 2: "+(p.a%10)+" + "+(p.b%10)+"을 먼저 계산해 보세요.";
+    return "💡 힌트 3: 10개가 넘으면 10개를 한 묶음으로 생각해요.";
+  }else{
+    if(level===1) return "💡 힌트 1: 일의 자리부터 살펴봐요.";
+    if(level===2) return "💡 힌트 2: "+(p.a%10)+"에서 "+(p.b%10)+"을 뺄 수 있는지 생각해 보세요.";
+    return "💡 힌트 3: 뺄 수 없으면 십의 자리에서 1을 빌려와요.";
+  }
+}
+function explanationFor(p){
+  if(p.op==="+"){
+    var u=(p.a%10)+(p.b%10);
+    return "① 일의 자리: "+(p.a%10)+" + "+(p.b%10)+" = "+u+
+      "<br>② "+(u>=10?"10개를 한 묶음으로 만들고 십의 자리에 1을 더해요.":"10개가 되지 않아요.")+
+      "<br>③ 십의 자리를 계산하면 정답이 나와요.";
+  }
+  return "① 일의 자리부터 계산해요.<br>② "+((p.a%10)<(p.b%10)?"일의 자리에서 뺄 수 없으므로 십의 자리에서 1을 빌려와요.":"일의 자리에서 바로 뺄 수 있어요.")+
+    "<br>③ 십의 자리와 일의 자리를 차례대로 계산해요.";
+}
 function render(){
-var p=makeProblems()[q];$("meta").textContent=state.cycle+"차 · "+state.lesson+"회차 · "+(q+1)+"/10";$("lessonTitle").textContent=state.lesson<=10?"한 자리 수 ↔ 두 자리 수":"두 자리 수 ↔ 두 자리 수";
-$("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
-$("process").innerHTML=p.op=="+"?"<div class='process-row'><span class='label'>받아올림 숫자</span><input class='num' id='carry' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>":"<div class='process-row'><span class='label'>빌려온 1</span><input class='num' id='borrow' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off'></div>";
-$("answer").value="";$("feedback").className="";$("feedback").innerHTML="";$("checkBtn").classList.remove("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
-var first=$(p.op=="+"?"carry":"borrow");
-if(first){
-  first.autofocus=true;
-  first.focus({preventScroll:true});
-  try{first.setSelectionRange(0,0)}catch(e){}
+  var p=(reviewMode ? reviewProblem : makeProblems()[q]);
+  $("meta").textContent=state.cycle+"차 · "+state.lesson+"회차 · "+(reviewMode?"복습":"문제 "+(q+1)+"/10");
+  $("lessonTitle").textContent=state.lesson<=10?"한 자리 수 ↔ 두 자리 수":"두 자리 수 ↔ 두 자리 수";
+  $("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
+  $("visual").innerHTML=visualFor(p);
+  $("hintBox").innerHTML=hintFor(p,1)+" <button id='hintBtn' class='small'>힌트 더 보기</button>";
+  var opts=[p.ans], deltas=[-1,1,-10,10,2,-2,5,-5];
+  for(var i=0;i<deltas.length && opts.length<4;i++){
+    var n=p.ans+deltas[i];
+    if(n>=0 && opts.indexOf(n)<0) opts.push(n);
+  }
+  while(opts.length<4) opts.push(p.ans+opts.length);
+  opts.sort(function(){return Math.random()-.5});
+  $("choices").innerHTML=opts.map(function(n){
+    return "<button class='secondary choice' data-value='"+n+"'>"+n+"</button>";
+  }).join("");
+  document.querySelectorAll(".choice").forEach(function(b){
+    b.onclick=function(){choose(Number(b.dataset.value),p)};
+  });
+  $("hintBtn").onclick=function(){
+    var level=Number(this.dataset.level||1)+1;
+    this.dataset.level=level;
+    $("hintBox").innerHTML=hintFor(p,Math.min(3,level))+(level<3?" <button id='hintBtn' class='small'>힌트 더 보기</button>":"");
+    var nb=$("hintBtn"); if(nb) nb.onclick=this.onclick;
+  };
+  $("feedback").className="";$("feedback").innerHTML="";
+  $("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
+  setTimeout(function(){var f=document.querySelector(".choice");if(f)f.focus()},100);
 }
+function choose(v,p){
+  attemptsThisLesson++;
+  document.querySelectorAll(".choice").forEach(function(b){b.disabled=true});
+  if(v===p.ans){
+    $("feedback").className="feedback good";
+    stars=(stars||0)+1; localStorage.setItem("seoyeonStars",stars);
+    $("feedback").innerHTML="🎉 정답이에요! ⭐ 별 "+stars+"개<br><small>"+explanationFor(p)+"</small>";
+    $("nextBtn").classList.remove("hidden");
+  }else{
+    perfect=false; tries++;
+    $("feedback").className="feedback bad";
+    $("feedback").innerHTML="❌ 아쉬워요.<br><b>👩‍🏫 풀이 방법</b><br>"+explanationFor(p);
+    $("retryBtn").classList.remove("hidden");
+  }
 }
-function fail(msg){$("feedback").className="feedback bad";$("feedback").innerHTML=msg}
-function check(){
-var p=makeProblems()[q],v=Number($("answer").value);if($("answer").value.trim()===""){fail("✏️ 정답을 입력해 주세요.");return}attemptsThisLesson++;tries++;
-if(v===p.ans){$("feedback").className="feedback good";$("feedback").innerHTML=tries===1?"🎉 정답이에요!":"👏 다시 풀어서 맞혔어요!";$("checkBtn").classList.add("hidden");$("retryBtn").classList.add("hidden");$("nextBtn").classList.remove("hidden")}
-else{perfect=false;fail("❌ 아쉬워요. 다시 생각해 볼까요?<br>💡 "+(p.op=="+"?"일의 자리부터 더하고 10 이상이면 1을 받아올림해요.":"일의 자리에서 뺄 수 없으면 십의 자리에서 1을 빌려와요."));$("checkBtn").classList.add("hidden");$("retryBtn").classList.remove("hidden")}
-}
-function retry(){tries=0;$("answer").value="";var c=$("carry");if(c)c.value="";var b=$("borrow");if(b)b.value="";$("feedback").className="";$("feedback").innerHTML="";$("retryBtn").classList.add("hidden");$("checkBtn").classList.remove("hidden");var first=c||b;if(first)first.focus();else $("answer").focus()}
+function retry(){ render(); }
 function next(){
 if(q<9){q++;tries=0;render();return}
 var minutes=Math.max(1,Math.round((Date.now()-startTime)/60000));state.history.push({date:new Date().toISOString().slice(0,10),cycle:state.cycle,lesson:state.lesson,minutes:minutes,problems:10,firstCorrect:perfect?10:Math.max(0,10-(attemptsThisLesson-10)),wrong:Math.max(0,attemptsThisLesson-10)});
