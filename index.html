@@ -21,7 +21,9 @@ button{width:100%;border:0;border-radius:15px;padding:15px;margin-top:10px;font-
 .problem{width:230px;margin:16px auto;font:800 44px/1.05 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}.line{border-bottom:4px solid #222;margin-top:5px}
 .process-row,.answer-row{display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0}.label{font-size:20px;font-weight:800;white-space:nowrap}
 input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5;outline:3px solid #c7d2fe;caret-color:#111}
-.teach-title{font-size:18px;font-weight:800;margin-bottom:8px}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.choice-grid button{font-size:22px;font-weight:800;min-height:58px}
+.hint{background:#fff7ed;border-radius:15px;padding:14px;margin:10px 0;line-height:1.75;text-align:left}.teach-title{font-size:18px;font-weight:800;margin-bottom:8px}
 .feedback{padding:14px;border-radius:15px;margin-top:12px;line-height:1.6}.bad{background:#fef2f2;color:#991b1b}.good{background:#ecfdf5;color:#166534}
 .ticket{border:3px dashed #d97706;background:#fffbeb;border-radius:18px;padding:18px;text-align:center}.big{font-size:34px;font-weight:900;color:#92400e}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 4px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
@@ -86,7 +88,7 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 (function(){
 "use strict";
 var KEY="seoyeon_math_v2";
-var reviewMode=false, reviewProblem=null, stars=Number(localStorage.getItem('seoyeonStars')||0);
+var currentProblem=null, reviewMode=false, reviewProblem=null, stars=Number(localStorage.getItem('seoyeonStars')||0);
 var state={cycle:1,lesson:1,tickets:0,food:0,earned:0,used:0,history:[],momNote:""};
 try{var x=localStorage.getItem(KEY);if(x)state=Object.assign(state,JSON.parse(x));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}update();}
@@ -160,11 +162,11 @@ function showHint(p,level){
   if(level<3 && $("hintMore")) $("hintMore").onclick=function(){showHint(p,level+1)};
 }
 function render(){
-  var p=(reviewMode ? reviewProblem : makeProblems()[q]);
+  var p=(reviewMode ? reviewProblem : makeProblems()[q]); currentProblem=p;
   $("meta").textContent=state.cycle+"차 · "+state.lesson+"회차 · "+(reviewMode?"복습":"문제 "+(q+1)+"/10");
   $("lessonTitle").textContent=state.lesson<=10?"한 자리 수 ↔ 두 자리 수":"두 자리 수 ↔ 두 자리 수";
   $("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
-  showHint(p,1);
+    showHint(p,1);
   var opts=[p.ans], deltas=[-1,1,-10,10,2,-2,5,-5];
   for(var i=0;i<deltas.length && opts.length<4;i++){
     var n=p.ans+deltas[i];
@@ -193,25 +195,37 @@ function choose(v,p){
   }else{
     perfect=false; tries++;
     $("feedback").className="feedback bad";
-    $("feedback").innerHTML="❌ 괜찮아요! 틀려도 다시 배우면 돼요. 😊<br><small>같은 문제를 다시 풀어볼게요.</small><br><button id='showExplain' class='small' style='margin-top:8px'>👩‍🏫 선생님과 풀이하기</button><div id='explainArea' style='margin-top:10px'></div>";
+    $("feedback").innerHTML="❌ 괜찮아요! 틀려도 다시 배우면 돼요. 😊<br><button id='showExplain' class='small' style='margin-top:8px'>👩‍🏫 선생님과 풀이하기</button><div id='explainArea' style='margin-top:10px'></div>";
 $("showExplain").onclick=function(){$("explainArea").innerHTML=explanationFor(p)};
     $("retryBtn").classList.remove("hidden");
-$("retryBtn").onclick=function(){retry();};
   }
 }
 function retry(){
-  var p=(reviewMode ? reviewProblem : makeProblems()[q]);
+  var p=currentProblem;
+  if(!p){ render(); return; }
   $("feedback").className="";
   $("feedback").innerHTML="";
+  $("hintBox").innerHTML="";
   $("retryBtn").classList.add("hidden");
   $("nextBtn").classList.add("hidden");
-  showHint(p,1);
+  var opts=[p.ans], deltas=[-1,1,-10,10,2,-2,5,-5];
+  for(var i=0;i<deltas.length && opts.length<4;i++){
+    var n=p.ans+deltas[i];
+    if(n>=0 && opts.indexOf(n)<0) opts.push(n);
+  }
+  while(opts.length<4) opts.push(p.ans+opts.length);
+  opts.sort(function(){return Math.random()-.5});
+  $("choices").innerHTML=opts.map(function(n){
+    return "<button class='secondary choice' data-value='"+n+"'>"+n+"</button>";
+  }).join("");
   document.querySelectorAll(".choice").forEach(function(b){
     b.disabled=false;
-    b.classList.remove("selected","wrong","correct");
+    b.onclick=function(){choose(Number(b.dataset.value),p)};
   });
-  var first=document.querySelector(".choice");
-  if(first){ setTimeout(function(){ first.focus(); },50); }
+  showHint(p,1);
+  setTimeout(function(){var f=document.querySelector(".choice");if(f)f.focus()},100);
+});
+  setTimeout(function(){var f=document.querySelector(".choice");if(f)f.focus()},100);
 }
 function next(){
 if(q<9){q++;tries=0;render();return}
