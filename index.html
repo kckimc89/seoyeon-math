@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#4f46e5">
 <link rel="manifest" href="manifest.webmanifest">
-<title>서연이 수학공부</title>
+<title>서연이 수학공부 V7.3 V7.3</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f4f6fb;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
 main{max-width:720px;margin:auto;padding:14px 16px 50px}.top{position:sticky;top:0;z-index:10;background:#f4f6fb;padding:7px 0 10px}
@@ -30,9 +30,9 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 .advice{background:#eff6ff;border-radius:15px;padding:14px;line-height:1.7}.note{background:#f8fafc;border-radius:15px;padding:13px;line-height:1.6}
 .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:99px;padding:5px 9px;font-size:13px;font-weight:800}
 @media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
-</style>
+.version-badge{position:fixed;top:8px;right:10px;z-index:999;font-size:11px;font-weight:800;background:#eef2ff;padding:5px 8px;border-radius:999px;opacity:.9}</style>
 </head>
-<body>
+<body><div class='version-badge'>V7.3 수정버전</div>
 <main>
 <div class="top"><div class="head"><div class="brand">🌟 서연이 수학공부</div><div class="wallet" id="topWallet">📺 0장</div></div><div class="progress"><div class="bar" id="bar"></div></div></div>
 
@@ -252,5 +252,5 @@ document.addEventListener("keydown",function(e){if(e.key!=="Enter")return;var t=
 update();
 })();
 </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script></body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=7.3').catch(()=>{}));}</script></body>
 </html>
