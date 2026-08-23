@@ -32,7 +32,7 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 @media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
 .version-badge{position:fixed;top:8px;right:10px;z-index:999;font-size:11px;font-weight:800;background:#eef2ff;padding:5px 8px;border-radius:999px;opacity:.9}</style>
 </head>
-<body><div class='version-badge'>V7.3 수정버전</div>
+<body><div class='version-badge'>V7.3.2 수정버전</div>
 <main>
 <div class="top"><div class="head"><div class="brand">🌟 서연이 수학공부</div><div class="wallet" id="topWallet">📺 0장</div></div><div class="progress"><div class="bar" id="bar"></div></div></div>
 
@@ -42,7 +42,7 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 <div class="stat">학습 차수<b id="sCycle">1차</b></div><div class="stat">현재 회차<b id="sLesson">1회</b></div>
 <div class="stat">TV 시청권<b id="sTickets">0장</b></div><div class="stat">외식권<b id="sFood">0장</b></div>
 </div>
-<div class="grid" style="margin-top:12px"><button id="reviewStart" class="secondary" style="margin-bottom:10px">🔁 오늘의 5분 복습</button><button id="startBtn">📚 수학 공부 시작</button><button class="secondary" id="walletBtn">🎁 보상 지갑</button><button class="dark" id="reportBtn">👩 엄마 학습리포트</button><button class="secondary" id="guideBtn">📖 학습 방법</button></div>
+<div class="grid" style="margin-top:12px"><button id="reviewStart" class="secondary" style="margin-bottom:10px">🔁 오늘의 5분 복습</button><button id="startBtn" type="button" onclick="safeStartLesson()">📚 수학 공부 시작</button><button class="secondary" id="walletBtn">🎁 보상 지갑</button><button class="dark" id="reportBtn">👩 엄마 학습리포트</button><button class="secondary" id="guideBtn">📖 학습 방법</button></div>
 </section>
 
 <section id="guide" class="card hidden">
@@ -252,5 +252,15 @@ document.addEventListener("keydown",function(e){if(e.key!=="Enter")return;var t=
 update();
 })();
 </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=7.3').catch(()=>{}));}</script></body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=7.3').catch(()=>{}));}
+function safeStartLesson(){
+  try{
+    if(typeof startLesson==="function") startLesson();
+    else alert("수업을 시작할 수 없습니다. 페이지를 새로고침해 주세요.");
+  }catch(e){
+    console.error(e);
+    alert("수업을 시작하는 중 문제가 생겼어요. 페이지를 새로고침해 주세요.");
+  }
+}
+</script></body>
 </html>
