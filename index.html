@@ -21,13 +21,7 @@ button{width:100%;border:0;border-radius:15px;padding:15px;margin-top:10px;font-
 .problem{width:230px;margin:16px auto;font:800 44px/1.05 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}.line{border-bottom:4px solid #222;margin-top:5px}
 .process-row,.answer-row{display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0}.label{font-size:20px;font-weight:800;white-space:nowrap}
 input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-size:28px;outline:none}.answer{width:150px;height:58px;border:2px solid #cbd5e1;border-radius:14px;text-align:center;font-size:32px;outline:none}.num:focus,.answer:focus{border-color:#4f46e5;outline:3px solid #c7d2fe;caret-color:#111}
-.visual{background:#f8fafc;border-radius:18px;padding:14px;margin:12px 0;text-align:center}
-.visual-title{font-weight:800;margin-bottom:8px}.blocks{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;max-width:330px;margin:auto}
-.ten{width:58px;height:24px;border:2px solid #4f46e5;border-radius:6px;background:#eef2ff}
-.block{width:22px;height:22px;border:2px solid #4f46e5;border-radius:5px;background:#eef2ff}
-.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.choice-grid button{font-size:22px;font-weight:800;min-height:58px}
-.hint{background:#fff7ed;border-radius:15px;padding:14px;margin:10px 0;line-height:1.75;text-align:left}.teach-title{font-size:18px;font-weight:800;margin-bottom:8px}
+.teach-title{font-size:18px;font-weight:800;margin-bottom:8px}
 .feedback{padding:14px;border-radius:15px;margin-top:12px;line-height:1.6}.bad{background:#fef2f2;color:#991b1b}.good{background:#ecfdf5;color:#166534}
 .ticket{border:3px dashed #d97706;background:#fffbeb;border-radius:18px;padding:18px;text-align:center}.big{font-size:34px;font-weight:900;color:#92400e}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 4px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
@@ -62,7 +56,6 @@ input{font:inherit} .num{width:74px;height:52px;border:2px solid #cbd5e1;border-
 
 <section id="lesson" class="card hidden">
 <div class="center muted" id="meta"></div><h2 class="center" id="lessonTitle"></h2><div class="problem" id="problem"></div>
-<div id="visual"></div>
 <div class="answer-row"><span class="label">정답을 골라보세요</span></div>
 <div id="choices" class="choice-grid"></div>
 <div id="hintBox" class="hint"></div>
@@ -121,20 +114,6 @@ function makeReviewProblem(){
   }
   return candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : all[Math.floor(Math.random()*all.length)];
 }
-function visualFor(p){
-  var a=Math.min(40,p.a), b=Math.min(40,p.b);
-  function blocks(n){
-    var h="";
-    for(var i=0;i<n;i++) h+="<span class='"+(i%10===0&&i>0?"ten":"block")+"'></span>";
-    return h;
-  }
-  return "<div class='visual-title'>🔢 숫자를 그림으로 생각해 봐요</div>"+
-    "<div class='muted'>"+p.a+" "+p.op+" "+p.b+"</div>"+
-    "<div class='blocks' style='margin-top:8px'>"+blocks(a)+"</div>"+
-    "<div style='font-weight:800;margin:6px'>"+(p.op==="+"?"＋":"－")+"</div>"+
-    "<div class='blocks'>"+blocks(b)+"</div>"+
-    "<div class='muted' style='margin-top:8px'>10개가 한 묶음이에요.</div>";
-}
 function hintFor(p,level){
   if(p.op==="+"){
     if(level===1) return "💡 힌트 1: 일의 자리부터 계산해 볼까요?";
@@ -185,7 +164,6 @@ function render(){
   $("meta").textContent=state.cycle+"차 · "+state.lesson+"회차 · "+(reviewMode?"복습":"문제 "+(q+1)+"/10");
   $("lessonTitle").textContent=state.lesson<=10?"한 자리 수 ↔ 두 자리 수":"두 자리 수 ↔ 두 자리 수";
   $("problem").innerHTML="<div>"+p.a+"</div><div>"+p.op+"&nbsp;"+p.b+"</div><div class='line'></div>";
-  $("visual").innerHTML=visualFor(p);
   showHint(p,1);
   var opts=[p.ans], deltas=[-1,1,-10,10,2,-2,5,-5];
   for(var i=0;i<deltas.length && opts.length<4;i++){
@@ -201,7 +179,7 @@ function render(){
     b.onclick=function(){choose(Number(b.dataset.value),p)};
   });
   $("feedback").className="";$("feedback").innerHTML="";
-  $("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
+  $("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");$("retryBtn").onclick=function(){retry();};
   setTimeout(function(){var f=document.querySelector(".choice");if(f)f.focus()},100);
 }
 function choose(v,p){
@@ -215,18 +193,25 @@ function choose(v,p){
   }else{
     perfect=false; tries++;
     $("feedback").className="feedback bad";
-    $("feedback").innerHTML="❌ 괜찮아요! 틀려도 다시 배우면 돼요. 😊<br><button id='showExplain' class='small' style='margin-top:8px'>👩‍🏫 선생님과 풀이하기</button><div id='explainArea' style='margin-top:10px'></div>";
+    $("feedback").innerHTML="❌ 괜찮아요! 틀려도 다시 배우면 돼요. 😊<br><small>같은 문제를 다시 풀어볼게요.</small><br><button id='showExplain' class='small' style='margin-top:8px'>👩‍🏫 선생님과 풀이하기</button><div id='explainArea' style='margin-top:10px'></div>";
 $("showExplain").onclick=function(){$("explainArea").innerHTML=explanationFor(p)};
     $("retryBtn").classList.remove("hidden");
+$("retryBtn").onclick=function(){retry();};
   }
 }
 function retry(){
   var p=(reviewMode ? reviewProblem : makeProblems()[q]);
-  $("feedback").className="";$("feedback").innerHTML="";
-  $("retryBtn").classList.add("hidden");$("nextBtn").classList.add("hidden");
-  var buttons=document.querySelectorAll(".choice");
-  buttons.forEach(function(b){b.disabled=false});
-  setTimeout(function(){var f=document.querySelector(".choice");if(f)f.focus()},100);
+  $("feedback").className="";
+  $("feedback").innerHTML="";
+  $("retryBtn").classList.add("hidden");
+  $("nextBtn").classList.add("hidden");
+  showHint(p,1);
+  document.querySelectorAll(".choice").forEach(function(b){
+    b.disabled=false;
+    b.classList.remove("selected","wrong","correct");
+  });
+  var first=document.querySelector(".choice");
+  if(first){ setTimeout(function(){ first.focus(); },50); }
 }
 function next(){
 if(q<9){q++;tries=0;render();return}
